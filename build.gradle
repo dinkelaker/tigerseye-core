@@ -1,0 +1,64 @@
+apply plugin: 'maven'
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'eclipse'
+
+repositories {
+	mavenLocal()
+	maven {
+		url 'https://repo1.maven.org/maven2/'
+	}
+	jcenter()
+}
+
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			snapshotRepository(url: "https://myhost.com:8081/artifactory/simple/libs-snapshot-local/"){}
+			repository(url: "https://myhost.com:8081/artifactory/simple/libs-release/"){}
+		}
+	}
+}
+
+sourceSets {
+    main {
+        groovy {
+            srcDirs = ['src']
+        }
+    }
+
+    test {
+        groovy {
+            srcDirs = ['test']
+        }
+    }
+}
+
+test {
+	useJUnitPlatform()
+}
+
+jar {
+	// configuration of MANIFEST.MF content
+	manifest {
+//		attributes 'Implementation-Title': project.name, 'Implementation-Version': version, 'Build-Tool': 'Gradle-'+rootProject.tasks.wrapper.gradleVersion
+	}
+}
+
+tasks.withType(Test) {
+	afterTest { desc, result ->
+		println "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
+	}
+}
+
+task sourceJar(type: Jar) {
+	from sourceSets.main.groovy
+	classifier = "source"
+}
+
+dependencies {  
+	implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.7'
+
+    testImplementation("junit:junit:4.13")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.7.1")
+}
