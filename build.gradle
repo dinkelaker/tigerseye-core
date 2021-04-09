@@ -1,7 +1,9 @@
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 apply plugin: 'java'
 apply plugin: 'groovy'
 apply plugin: 'eclipse'
+
+apply from: 'config/project-settings.gradle'
 
 repositories {
 	mavenLocal()
@@ -11,11 +13,17 @@ repositories {
 	jcenter()
 }
 
-uploadArchives {
+java {
+	withJavadocJar()
+	withSourcesJar()
+}
+
+publishing {
 	repositories {
-		mavenDeployer {
-			snapshotRepository(url: "https://myhost.com:8081/artifactory/simple/libs-snapshot-local/"){}
-			repository(url: "https://myhost.com:8081/artifactory/simple/libs-release/"){}
+		maven {
+			def releasesRepoUrl = "$buildDir/repos/releases"
+			def snapshotsRepoUrl = "$buildDir/repos/snapshots"
+			url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
 		}
 	}
 }
@@ -38,22 +46,10 @@ test {
 	useJUnitPlatform()
 }
 
-jar {
-	// configuration of MANIFEST.MF content
-	manifest {
-//		attributes 'Implementation-Title': project.name, 'Implementation-Version': version, 'Build-Tool': 'Gradle-'+rootProject.tasks.wrapper.gradleVersion
-	}
-}
-
 tasks.withType(Test) {
 	afterTest { desc, result ->
 		println "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
 	}
-}
-
-task sourceJar(type: Jar) {
-	from sourceSets.main.groovy
-	classifier = "source"
 }
 
 dependencies {  
@@ -61,4 +57,55 @@ dependencies {
 
     testImplementation("junit:junit:4.13")
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.7.1")
+}
+
+jar {
+	// configuration of MANIFEST.MF content
+	manifest {
+		attributes 'Specification-Title': 'Tigereyes DSL Framework - ' + project.name.capitalize(),
+			'Specification-Version': project.version[0..2],
+			'Specification-Vendor': 'Technische Universitaet Darmstadt, Germany',
+			'Implementation-Title': "${project.group}.${project.name}",
+			'Implementation-Version': project.version,
+			'Implementation-Vendor': 'Technische Universitaet Darmstadt, Germany',
+			'Build-Tool': 'Gradle-'+project.getGradle().getGradleVersion(),
+			'Created-By': 'Groovy-'+GroovySystem.getVersion(),
+			'Built-By': 'Tom Dinkelaker',
+			'Build-Jdk': JavaVersion.current()
+	}
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+			pom {
+				name = 'Tigereyes DSL Framework - ' + project.name.capitalize()
+				description = 'TigersEye helps to build domain-specific languages (DSLs) as composable libraries'
+				url = 'https://github.com/dinkelaker/tigerseye-core'
+				/*properties = [
+					myProp: "value",
+					"prop.with.dots": "anotherValue"
+				]*/
+				licenses {
+					license {
+						name = 'The Apache License, Version 2.0'
+						url = 'https://www.apache.org/licenses/LICENSE-2.0.html'
+					}
+				}
+				developers {
+					developer {
+						id = 'dinkelaker'
+						name = 'Tom Dinkelaker'
+						email = 'tom.dinkelaker@gmail.com'
+					}
+				}
+				scm {
+					connection = 'scm:git:git@github.com:dinkelaker/tigerseye-core.git'
+					developerConnection = 'scm:git:ssh://github.com/tigerseye-core.git'
+					url = 'https://github.com/dinkelaker/tigerseye-core'
+				}
+			}
+		}
+	}
 }
