@@ -66,55 +66,71 @@ public class BlackBoxCombiner extends InterpreterCombiner {
 		super(dslDefinitions, context);
 		checkAllLanguageFacades(dslDefinitions);
 	}
+	
+	public BlackBoxCombiner(List<DSL> dslDefinitions) {
+		//Black-box composition only accepts sets, so we need to convert it
+		super(dslDefinitions as Set);
+		checkAllLanguageFacades(dslDefinitions);
+	}
 
-//	public void checkAllLanguageFacades(Set<DSL> dslDefinitions) {
-//		for (DSL dsl : dslDefinitions) {
-//			for (DSL other : dslDefinitions) {
-//				checkLanguageFacadesHaveDisjointExpressionTypes(dsl,other);			 
-//			}
-//		}
-//	}
-//	
-//	private List<MetaMethod> filterDefaultMethods(List<MetaMethod> methods) {
-//		List<MetaMethod> filteredMethods = new LinkedList<MetaMethod>();
-//		
-//		Class classOfInterpreter = Interpreter.class;
-//		Class classOfGroovyObjectSupport = GroovyObjectSupport.class; 
-//		
-//		for (MetaMethod m1 : methods) {
-//			boolean contains = false;
-//			for (MetaMethod m2 : classOfInterpreter.metaClass.getMethods()) {
-//			    String sig1 = m1.getSignature();
-//			    String sig2 = m2.getSignature();
-//		        if (sig1.equals(sig2)) {
-//			      //println "Filter: " + m1.toString();
-//  		          contains = true;
-//  		          break;
-//		        }
-//		    } 
-//			if (!contains) {
-//		        //println "Real: " + m1.toString();
-//				filteredMethods.add(m1);
-//			}
-//		}
-//		
-//		return filteredMethods;
-//	}
-//	
-//	public void checkLanguageFacadesHaveDisjointExpressionTypes(DSL one, DSL other) {
-//		if (one == other) return;
-//		//if (one.equals(other)) return;
-//		
-//		for (MetaMethod m1 : filterDefaultMethods(one.metaClass.getMethods())) {
-//			for (MetaMethod m2 : filterDefaultMethods(other.metaClass.getMethods())) {
-//			    //println "Cmp: " + m1.getSignature().toString() + " <-> " + m2.getSignature().toString();
-//			    if (m1.getSignature().equals(m2.getSignature())) {
-//			    	//Conflict detected
-//			    	throw new SyntaxConflictException("The BlackBoxCombiner detected a syntax conflict (non-unique signature signature '$m1.signature') between the combined DSLs '$one' and '$other' in keyword '$m1'.");
-//			    }
-//			}
-//		}
-//	}
+	public BlackBoxCombiner(List<DSL> dslDefinitions, Map<String, Object> context) {
+		//Black-box composition only accepts sets, so we need to convert it
+		super(dslDefinitions as Set, context);
+		checkAllLanguageFacades(dslDefinitions);
+	}
+
+	public void checkAllLanguageFacades(Set<DSL> dslDefinitions) {
+		for (DSL dsl : dslDefinitions) {
+			for (DSL other : dslDefinitions) {
+				checkLanguageFacadesHaveDisjointExpressionTypes(dsl,other);			 
+			}
+		}
+	}
+	
+	public void checkAllLanguageFacades(List<DSL> dslDefinitions) {
+		checkAllLanguageFacades(dslDefinitions as Set)
+	}
+
+    private List<MetaMethod> filterDefaultMethods(List<MetaMethod> methods) {
+		List<MetaMethod> filteredMethods = new LinkedList<MetaMethod>();
+		
+		Class classOfInterpreter = Interpreter.class;
+		Class classOfGroovyObjectSupport = GroovyObjectSupport.class; 
+		
+		for (MetaMethod m1 : methods) {
+			boolean contains = false;
+			for (MetaMethod m2 : classOfInterpreter.metaClass.getMethods()) {
+			    String sig1 = m1.getSignature();
+			    String sig2 = m2.getSignature();
+		        if (sig1.equals(sig2)) {
+			      //println "Filter: " + m1.toString();
+  		          contains = true;
+  		          break;
+		        }
+		    } 
+			if (!contains) {
+		        //println "Real: " + m1.toString();
+				filteredMethods.add(m1);
+			}
+		}
+		
+		return filteredMethods;
+	}
+	
+	public void checkLanguageFacadesHaveDisjointExpressionTypes(DSL one, DSL other) {
+		if (one == other) return;
+		//if (one.equals(other)) return;
+		
+		for (MetaMethod m1 : filterDefaultMethods(one.metaClass.getMethods())) {
+			for (MetaMethod m2 : filterDefaultMethods(other.metaClass.getMethods())) {
+			    //println "Cmp: " + m1.getSignature().toString() + " <-> " + m2.getSignature().toString();
+			    if (m1.getSignature().equals(m2.getSignature())) {
+			    	//Conflict detected
+			    	throw new SyntaxConflictException("The BlackBoxCombiner detected a syntax conflict (non-unique signature signature '$m1.signature') between the combined DSLs '$one' and '$other' in keyword '$m1'.");
+			    }
+			}
+		}
+	}
 	
 //// now in InterpreterCombiner	
 //	public Object methodMissing(String name, Object args) {

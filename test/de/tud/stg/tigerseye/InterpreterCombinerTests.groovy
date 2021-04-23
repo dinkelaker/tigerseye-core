@@ -38,7 +38,7 @@ public class InterpreterCombinerTests extends TestCase {
 
 
 	void testInterpreterCombinerUndefinedKeyword() {
-		DSL composedDsl = new InterpreterCombiner(new ExampleA(),new ExampleB());
+		DSL composedDsl = new InterpreterCombiner(new BaseLanguageA(),new BaseLanguageB());
 		try {
 			composedDsl.eval {
 		    	// A DSL PROGRAM - BEGIN
@@ -55,7 +55,7 @@ public class InterpreterCombinerTests extends TestCase {
 	}
 	
 	void testInterpreterCombiner() {
-		DSL dsl = new InterpreterCombiner(new ExampleA(),new ExampleB());
+		DSL dsl = new InterpreterCombiner(new BaseLanguageA(),new BaseLanguageB());
 	    dsl.eval {
 	    	// A DSL PROGRAM - BEGIN
 	    	

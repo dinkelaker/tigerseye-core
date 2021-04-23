@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 package de.tud.stg.tigerseye;
 
+import de.tud.stg.tigerseye.exceptions.DSLException
 import java.util.Map;
 import java.util.Set;
 
@@ -32,6 +33,18 @@ public class BBCombiner extends BlackBoxCombiner {
 	public BBCombiner(DSL dslDefinition1, DSL dslDefinition2,
 			Map<String, Object> context) {
 		super(dslDefinition1, dslDefinition2, context);
+		if (dslDefinition1.is(dslDefinition2)) throw new DSLException(Messages.DSL_NOT_UNIQUE);
+	}
+
+	public BBCombiner(DSL dslDefinition1, DSL dslDefinition2, 
+		DSL dslDefinition3, Map<String, Object> context) {
+		super([dslDefinition1, dslDefinition2, dslDefinition3] as Set, context);
+	}
+
+	public BBCombiner(DSL dslDefinition1, DSL dslDefinition2, 
+		DSL dslDefinition3, DSL dslDefinition4,
+		Map<String, Object> context) {
+		super([dslDefinition1, dslDefinition2, dslDefinition3, dslDefinition4] as Set, context);
 	}
 
 	public BBCombiner(Set<DSL> dslDefinitions) {
@@ -40,6 +53,16 @@ public class BBCombiner extends BlackBoxCombiner {
 
 	public BBCombiner(Set<DSL> dslDefinitions, Map<String, Object> context) {
 		super(dslDefinitions, context);
+	}
+
+	public BBCombiner(List<DSL> dslDefinitions) {
+		//Black-box composition only accepts sets, so we need to convert it 
+		super(dslDefinitions as Set);
+	}
+
+	public BBCombiner(List<DSL> dslDefinitions, Map<String, Object> context) {
+		//Black-box composition only accepts sets, so we need to convert it 
+		super(dslDefinitions as Set, context);
 	}
 
 }

@@ -24,7 +24,7 @@ import de.tud.stg.tigerseye.Interpreter;
  * An example language embedding that defines every different expression types.
  * @author Tom Dinkelaker
  */
-public class ExampleB extends Interpreter implements DSL {
+public class BaseLanguageB extends Interpreter implements DSL {
     
     public int keyword2() {
     	return 2;

@@ -16,18 +16,18 @@
 ///////////////////////////////////////////////////////////////////////////////
 package de.tud.stg.tigerseye.examples;
 
-import de.tud.stg.tigerseye.DSL;
+import de.tud.stg.tigerseye.DSL; 
 import de.tud.stg.tigerseye.Interpreter;
-
+import de.tud.stg.tigerseye.examples.BaseLanguageA;
 
 /**
  * An example language embedding that defines every different expression types.
  * @author Tom Dinkelaker
  */
-public class ExampleA extends Interpreter implements DSL {
+public class CLanguageExtensionForA extends BaseLanguageA implements DSL {
     
-    public int keyword1() {
-    	return 1;
+    public int keyword3() {
+    	return 3;
     }
     
 }
