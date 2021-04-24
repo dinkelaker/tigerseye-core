@@ -46,18 +46,3 @@ git@github.com:dinkelaker/tigerseye-core.git
 
 
 
-# PITFALLS
-
-## Windows 10
-
-### Could not open/create prefs
-When: when exeuting gradle compile for analysis sub-project
-
-Error Message: 
-
-    WARNING: Could not open/create prefs root node Software\JavaSoft\Prefs..."
-
-Solution:
-* https://github.com/julienvollering/MIAmaxent/issues/1
-* https://stackoverflow.com/questions/16428098/groovy-shell-warning-could-not-open-create-prefs-root-node
-
