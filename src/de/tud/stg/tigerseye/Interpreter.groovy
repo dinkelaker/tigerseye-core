@@ -17,15 +17,15 @@
 package de.tud.stg.tigerseye;
 
 import groovy.lang.Closure;
-import groovy.lang.GroovyObjectSupport;
+import groovy.lang.GroovyObject;
 import groovy.lang.MetaClass;
 
 /**
  * The Interpreter must be a GroovyObject so its missingMethod implementations
- * etc. will be invoked. So we inherit {@link GroovyObjectSupport}, which makes
+ * etc. will be invoked. So we inherit {@link GroovyObject}, which makes
  * provides the default implementations for GroovyObjects in Java.
  */
-public class Interpreter extends GroovyObjectSupport implements DSL {
+public class Interpreter implements GroovyObject, DSL {
 
 	protected final static boolean DEBUG = false;
 	

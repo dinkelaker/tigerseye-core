@@ -95,7 +95,7 @@ public class BlackBoxCombiner extends InterpreterCombiner {
 		List<MetaMethod> filteredMethods = new LinkedList<MetaMethod>();
 		
 		Class classOfInterpreter = Interpreter.class;
-		Class classOfGroovyObjectSupport = GroovyObjectSupport.class; 
+		Class classOfGroovyObject = GroovyObject.class;
 		
 		for (MetaMethod m1 : methods) {
 			boolean contains = false;

@@ -17,7 +17,7 @@
 package de.tud.stg.tigerseye;
 
 import groovy.lang.Closure;
-import groovy.lang.GroovyObjectSupport;
+import groovy.lang.GroovyObject;
 import groovy.lang.MetaMethod;
 import groovy.lang.MetaProperty;
 import groovy.lang.MissingMethodException;
@@ -87,7 +87,7 @@ public class InterpreterCombiner extends Interpreter implements InternalContextD
 		this.dslDefinitions.add(dslDefinition2);
 		this.internalContext =  new java.util.HashMap<String,Object>();
 		setCombinerAsBodyDelegateOfAllInterpreters();
-	} 
+	}
 
 	public InterpreterCombiner(Set<DSL> dslDefinitions) {
 		this(dslDefinitions, new java.util.HashMap<String,Object>());

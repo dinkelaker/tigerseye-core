@@ -17,7 +17,7 @@
 package de.tud.stg.tigerseye;
 
 import groovy.lang.Closure;
-import groovy.lang.GroovyObjectSupport;
+import groovy.lang.GroovyObject;
 import groovy.lang.MetaMethod;
 import groovy.lang.MetaProperty;
 import groovy.lang.MissingMethodException;
@@ -77,9 +77,13 @@ public class LinearizingCombiner extends InterpreterCombiner {
 
 	public LinearizingCombiner(DSL dslDefinition1, DSL dslDefinition2, Map<String, Object> context) {
 		super(dslDefinition1,dslDefinition2,context);
-	} 
+	}
 
 	public LinearizingCombiner(List<DSL> dslDefinitions) {
+		super(dslDefinitions);
+	}
+
+	public LinearizingCombiner(Set<DSL> dslDefinitions) {
 		super(dslDefinitions);
 	}
 
@@ -110,7 +114,7 @@ public class LinearizingCombiner extends InterpreterCombiner {
         HashMap<DSL,MetaMethod> methods = new HashMap<DSL,MetaMethod>();
 		for(DSL dsl : dslDefinitions) {
 			if (DEBUG) System.out.println("LinearizingCombiner: try to find 'methodMissing' in "+ dsl);
-			MetaMethod method = ((GroovyObjectSupport)dsl).getMetaClass().pickMethod("methodMissing",(Class[])[String.class, Object[].class]);
+			MetaMethod method = ((GroovyObject)dsl).getMetaClass().pickMethod("methodMissing",(Class[])[String.class, Object[].class]);
             if (method != null) {
             	methods.put(dsl,method);
             	if (SPEED_UP) break;
@@ -122,8 +126,8 @@ public class LinearizingCombiner extends InterpreterCombiner {
 		//Ignore syntax conflicts and simply invoke the first interpreter found
 		DSL dsl =(DSL)methods.keySet().iterator().next(); 
 		MetaMethod uniqueMethod = (MetaMethod)methods.get(dsl);
-		if (DEBUG) System.out.println("LinearizingCombiner: unique method found "+uniqueMethod);
-		if (DEBUG) System.out.println("LinearizingCombiner: unique method found "+uniqueMethod.getSignature());
+		if (DEBUG) System.out.println("LinearizingCombiner: first method found "+uniqueMethod);
+		if (DEBUG) System.out.println("LinearizingCombiner: first method found "+uniqueMethod.getSignature());
 		return uniqueMethod.invoke(dsl,(Object[])[name,args] );
 	}
 	
@@ -131,7 +135,7 @@ public class LinearizingCombiner extends InterpreterCombiner {
         HashMap<DSL,MetaMethod> methods = new HashMap<DSL,MetaMethod>();
 		for(DSL dsl : dslDefinitions) {
 			if (DEBUG) System.out.println("LinearizingCombiner: try to find 'propertyMissing' in "+ dsl);
-			MetaMethod method = ((GroovyObjectSupport)dsl).getMetaClass().pickMethod("propertyMissing",(Class[])[String.class]);
+			MetaMethod method = ((GroovyObject)dsl).getMetaClass().pickMethod("propertyMissing",(Class[])[String.class]);
             if (method != null) {
             	methods.put(dsl,method);
             	if (SPEED_UP) break;
@@ -143,8 +147,8 @@ public class LinearizingCombiner extends InterpreterCombiner {
 		//Ignore syntax conflicts and simply invoke the first interpreter found
 		DSL dsl =(DSL)methods.keySet().iterator().next(); 
 		MetaMethod uniqueMethod = (MetaMethod)methods.get(dsl);
-		if (DEBUG) System.out.println("LinearizingCombiner: unique 'propertyMissing' method found "+uniqueMethod+" in "+dsl);
-		if (DEBUG) System.out.println("LinearizingCombiner: unique 'propertyMissing' method found "+uniqueMethod.getSignature());
+		if (DEBUG) System.out.println("LinearizingCombiner: first 'propertyMissing' method found "+uniqueMethod+" in "+dsl);
+		if (DEBUG) System.out.println("LinearizingCombiner: first 'propertyMissing' method found "+uniqueMethod.getSignature());
 		return uniqueMethod.invoke(dsl,(Object[])[name]);
 	}
 	
@@ -152,7 +156,7 @@ public class LinearizingCombiner extends InterpreterCombiner {
         HashMap<DSL,MetaMethod> methods = new HashMap<DSL,MetaMethod>();
 		for(DSL dsl : dslDefinitions) {
 			if (DEBUG) System.out.println("LinearizingCombiner: try to find 'propertyMissing' in "+ dsl);
-			MetaMethod method = ((GroovyObjectSupport)dsl).getMetaClass().pickMethod("propertyMissing",(Class[])[String.class, Object.class]);
+			MetaMethod method = ((GroovyObject)dsl).getMetaClass().pickMethod("propertyMissing",(Class[])[String.class, Object.class]);
             if (method != null) {
             	methods.put(dsl,method);
             	if (SPEED_UP) break;
@@ -162,11 +166,16 @@ public class LinearizingCombiner extends InterpreterCombiner {
 			throw new MissingPropertyException(name, this.getClass());
 		}
 		//Ignore syntax conflicts and simply invoke the first interpreter found
-		DSL dsl =(DSL)methods.keySet().iterator().next(); 
+		DSL dsl =(DSL)methods.keySet().iterator().next();
+		//TODO refactor all occurrences of uniqueMethod to firstMethod
 		MetaMethod uniqueMethod = (MetaMethod)methods.get(dsl);
-		if (DEBUG) System.out.println("LinearizingCombiner: unique 'propertyMissing' method found "+uniqueMethod);
-		if (DEBUG) System.out.println("LinearizingCombiner: unique 'propertyMissing' method found "+uniqueMethod.getSignature());
+		if (DEBUG) System.out.println("LinearizingCombiner: first 'propertyMissing' method found "+uniqueMethod);
+		if (DEBUG) System.out.println("LinearizingCombiner: first 'propertyMissing' method found "+uniqueMethod.getSignature());
 		uniqueMethod.invoke(dsl,(Object[])[name,args] );
+		//TODO: This is an simplified solution that only invokes the first propertyMissing method found,
+		//      it does not support scenarios were in a list of DSLs more than one defines a propertyMissing method.
+
+
 	}	
 	
 	public Object methodMissing(String name, Object args) {
@@ -174,7 +183,7 @@ public class LinearizingCombiner extends InterpreterCombiner {
         HashMap<DSL,MetaMethod> methods = new HashMap<DSL,MetaMethod>();
 		for(DSL dsl : dslDefinitions) {
 			if (DEBUG) System.out.println("LinearizingCombiner: dsl="+dsl);
-			MetaMethod method = ((GroovyObjectSupport)dsl).getMetaClass().pickMethod(name,classesArrayForObjectArray((Object[])args));
+			MetaMethod method = ((GroovyObject)dsl).getMetaClass().pickMethod(name,classesArrayForObjectArray((Object[])args));
             if (method != null) {
             	methods.put(dsl,method);
             	if (SPEED_UP) break;
@@ -187,8 +196,10 @@ public class LinearizingCombiner extends InterpreterCombiner {
 		//Ignore syntax conflicts and simply invoke the first interpreter found
 		DSL dsl =(DSL)methods.keySet().iterator().next(); 
 		MetaMethod uniqueMethod = (MetaMethod)methods.get(dsl);
-		if (DEBUG) System.out.println("LinearizingCombiner: unique method found "+uniqueMethod);
+		if (DEBUG) System.out.println("LinearizingCombiner: first method found "+uniqueMethod);
 		return uniqueMethod.invoke(dsl,(Object[])args);
+		//TODO: This is an simplified solution that only invokes the first methodMissing method found,
+		//      it does not support scenarios were in a list of DSLs more than one defines a methodMissing method.
 	}
 
 	public void propertyMissing(String name, Object value) { 
@@ -200,7 +211,7 @@ public class LinearizingCombiner extends InterpreterCombiner {
 	        HashMap<DSL,MetaProperty> properties = new HashMap<DSL,MetaProperty>();
 			for(DSL dsl : dslDefinitions) {
 				if (DEBUG) System.out.println("LinearizingCombiner: dsl="+dsl);
-				MetaProperty property = ((GroovyObjectSupport)dsl).getMetaClass().getMetaProperty(name);
+				MetaProperty property = ((GroovyObject)dsl).getMetaClass().getMetaProperty(name);
 	            if (null != property) {
 	            	properties.put(dsl,property);
 	            	if (SPEED_UP) break;
@@ -223,7 +234,7 @@ public class LinearizingCombiner extends InterpreterCombiner {
 		if (DEBUG) System.out.println("LinearizingCombiner: propertyMissing "+name);
         HashMap<DSL,MetaProperty> fields = new HashMap<DSL,MetaProperty>();
 		for(DSL dsl : dslDefinitions) {
-			MetaProperty field = ((GroovyObjectSupport)dsl).getMetaClass().getMetaProperty(name);
+			MetaProperty field = ((GroovyObject)dsl).getMetaClass().getMetaProperty(name);
             if (null != field) { 
             	fields.put(dsl,field);
             	if (SPEED_UP) break;
